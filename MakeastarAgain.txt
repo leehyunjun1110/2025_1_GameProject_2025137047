@@ -1,0 +1,11 @@
+using System;
+using System.Text;
+
+
+public class star {
+	private static void Main(){
+		int a = int.Parse(Console.ReadLine());
+		char[,] j = new char[,];
+		j[0, 0] = '*';
+	} 
+}
