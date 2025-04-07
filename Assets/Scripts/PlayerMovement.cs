@@ -1,18 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5.0f;                                  // Speed Function announced
-    public float jumpForce = 5.0f;                                  // Jump Height Function announced
+    public float moveSpeed = 5.0f;                                      // Speed Function announced
+    public float jumpForce = 5.0f;                                      // Jump Height Function announced
 
-    public bool isGrounded = true;                                  // GroundCheck Function announced
+    public bool isGrounded = true;                                      // GroundCheck Function announced
 
-    public Rigidbody rb;                                            // Player Rigidbody announced
+    public Rigidbody rb;                                                // Player Rigidbody announced
      
-    public int coinCount = 0;                                       // CoinCount announced
-    public List<GameObject> totalCoins = new List<GameObject>();      // Total Coin announced
+    public int coinCount = 0;                                           // CoinCount announced
+    public List<GameObject> totalCoins = new List<GameObject>();        // Total Coin announced
 
     public GameObject door, endingText;
 
@@ -55,12 +56,16 @@ public class PlayerMovement : MonoBehaviour
             if (coinCount == totalCoins.Count)
             {
                 door.SetActive(true);
-
             }
         }
         if(other.CompareTag("Door"))
         {
             endingText.SetActive(true);
+            Invoke("RestartGame", 3.0f);
         }
+    }
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
