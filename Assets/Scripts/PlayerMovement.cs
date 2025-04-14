@@ -19,18 +19,25 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        door.SetActive(false);
-        endingText.SetActive(false);
+        if (door == null)
+            Debug.Log("Door가 없습니다.");
+        else
+            door.SetActive(false);
+        if (endingText == null)
+            Debug.Log("EndingText가 없습니다.");
+        else
+            endingText.SetActive(false);
+
     }
 
     void Update()
     {
         // Player Input Check
         float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
+        //float moveVertical = Input.GetAxis("Vertical");
 
         // Player Speed Value Directly Movement
-        rb.velocity = new Vector3(moveHorizontal * moveSpeed, rb.velocity.y, moveVertical * moveSpeed);
+        rb.velocity = new Vector3(moveHorizontal * moveSpeed, rb.velocity.y, rb.velocity.z);
 
         if (Input.GetKey(KeyCode.Space) && isGrounded)
         {

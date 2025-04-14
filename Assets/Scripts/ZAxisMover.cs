@@ -7,11 +7,6 @@ public class ZAxisMover : MonoBehaviour
     public float speed = 5.0f;
     public float timer = 5.0f;
 
-    void Start()
-    {
-        
-    }
-
     void Update()
     {
         transform.Translate(0, 0, speed * Time.deltaTime);
