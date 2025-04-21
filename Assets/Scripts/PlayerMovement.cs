@@ -19,6 +19,13 @@ public class PlayerMovement : MonoBehaviour
     public float coyoteTimeCounter;
     public bool realGrounded = true;
 
+    [Header("글라이더 설정")]
+    public GameObject gliderObject;
+    public float gliderFallSpeed = 1.0f;
+    public float gliderMoveSpeed = 7.0f;
+    public float gliderMaxTime = 5.0f;
+    public float gliderTimeLeft;
+    public bool isGliding = false;
 
     public bool isGrounded = true;                                      // GroundCheck Function announced
 
@@ -31,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        if (gliderObject != null)
+            gliderObject.SetActive(false);
         if (door == null)
             Debug.Log("Door가 없습니다.");
         else
@@ -39,6 +48,8 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("EndingText가 없습니다.");
         else
             endingText.SetActive(false);
+
+        gliderTimeLeft = gliderMaxTime;
 
         coyoteTimeCounter = 0;
     }
@@ -59,19 +70,56 @@ public class PlayerMovement : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(movement);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
         }
-        // Player Speed Value Directly Movement
-        rb.velocity = new Vector3(moveHorizontal * moveSpeed, rb.velocity.y, moveVertical * moveSpeed);
 
-        if (rb.velocity.y < 0)
+        if (Input.GetKey(KeyCode.G) && !isGrounded && gliderTimeLeft > 0)
         {
-            rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+            if (!isGliding)
+            {
+                EnableGlider();
+            }
+
+            gliderTimeLeft -= Time.deltaTime;
+
+            if (gliderTimeLeft <= 0)
+            {
+                DisableGlider();
+            }
         }
-        else if (rb.velocity.y > 0 && !Input.GetButton("Jump"))
+        else if (isGliding)
         {
-            rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+            DisableGlider();
         }
 
-        if (Input.GetKey(KeyCode.Space) && isGrounded)
+        if(isGliding)
+        {
+            ApplyGliderMovement(moveHorizontal, moveVertical);
+        }
+        else
+        {
+            // Player Speed Value Directly Movement
+            rb.velocity = new Vector3(moveHorizontal * moveSpeed, rb.velocity.y, moveVertical * moveSpeed);
+
+            if (rb.velocity.y < 0)
+            {
+                rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+            }
+            else if (rb.velocity.y > 0 && !Input.GetButton("Jump"))
+            {
+                rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+            }
+        }
+
+        if(isGrounded)
+        {
+            if (isGliding)
+            {
+                DisableGlider();
+            }
+
+            gliderTimeLeft = gliderMaxTime;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
@@ -140,9 +188,40 @@ public class PlayerMovement : MonoBehaviour
             endingText.SetActive(true);
             Invoke("RestartGame", 3.0f);
         }
+        if (other.gameObject.tag == "DeadZone")
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
     }
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    void EnableGlider()
+    {
+        isGliding = true;
+
+        if(gliderObject != null)
+        {
+            gliderObject.SetActive(true);
+        }
+
+        rb.velocity = new Vector3(rb.velocity.x, gliderFallSpeed, rb.velocity.z);
+    }
+    void DisableGlider()
+    {
+        isGliding = false;
+
+        if (gliderObject != null)
+        {
+            gliderObject.SetActive(false);
+        }
+
+        rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+    }
+    void ApplyGliderMovement(float horizontal, float vertical)
+    {
+        Vector3 gliderVelocity = new Vector3(horizontal * gliderMoveSpeed, -gliderFallSpeed, vertical * gliderMoveSpeed);
     }
 }
